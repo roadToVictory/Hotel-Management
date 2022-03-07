@@ -47,8 +47,6 @@ SELECT os.id_osoba, os.imie, os.nazwisko, sum(suma) as suma FROM cte JOIN hotel.
 GROUP by os.id_osoba, rezerwacja.id_rezerwacja
 ORDER BY os.id_osoba;
 
-
-------------------------------------------------------------
 CREATE OR REPLACE VIEW hotel.podsumowanie_rachunku(id_osoba, imie, nazwisko, oplata_za_pokoj, oplata_za_wyzywienie, oplata_za_sprzatanie, dodatkowe_oplaty,   suma) AS
 SELECT os.id_osoba, os.imie, os.nazwisko, pok.suma as oplata_za_pokoj, (COALESCE(wyz.suma,0)) as oplata_za_wyzywienie, (COALESCE(sp.suma,0)) as oplata_za_sprzatanie, (COALESCE(pin.dodatkowe_koszty, 0)) as dodatkowe_oplaty, (pok.suma+COALESCE(wyz.suma,0)+COALESCE(sp.suma,0)+COALESCE(pin.dodatkowe_koszty, 0)) as suma from hotel.osoba os 
 JOIN hotel.pokoj_rachunek pok using(id_osoba)
@@ -58,7 +56,6 @@ LEFT JOIN hotel.pokoj_info pin using(id_osoba)
 group by os.id_osoba, pok.suma, wyz.suma, sp.suma,pin.dodatkowe_koszty
 order by os.id_osoba;
 
--------------------------------------------------------------
 
 CREATE OR REPLACE VIEW hotel.kupon(id_osoba, imie, nazwisko, ile_pobytow) AS WITH cte AS
 (SELECT numer_dowodu, id_osoba, COUNT(id_rezerwacja) as ile_pobytow from hotel.osoba JOIN hotel.rezerwacja using(id_osoba) group by numer_dowodu, id_osoba HAVING COUNT(id_rezerwacja)>=2)
@@ -74,7 +71,6 @@ SELECT id_osoba, imie, nazwisko, suma FROM hotel.osoba JOIN cte using(id_osoba);
 CREATE OR REPLACE VIEW hotel.wolne_pokoje(id_kategoria, numer, opis_kategorii, cena) AS WITH cte AS (select numer from hotel.pokoj except select numer from hotel.termin_pokoj join hotel.termin using(id_termin) where termin_koncowy::TIMESTAMP>now())
 SELECT kat.id_kategoria, cte.numer, kat.opis_kategorii, kat.cena FROM hotel.kategoria kat JOIN hotel.pokoj using(id_kategoria) JOIN cte using(numer);
 
--------------------------------------------------------------------------------- 
 
 CREATE OR REPLACE FUNCTION hotel.pokoj_valid() RETURNS TRIGGER AS
 $$
@@ -95,7 +91,6 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER walidacja_termin_pokoj AFTER INSERT OR UPDATE ON hotel.rezerwacja FOR EACH ROW EXECUTE PROCEDURE hotel.pokoj_valid();
 
--------------------------------------------------------------------------------- 
 
 CREATE OR REPLACE FUNCTION hotel.rezerwacja_valid() RETURNS TRIGGER AS 
 $$
@@ -139,8 +134,6 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER walidacja_rezerwacji BEFORE INSERT OR UPDATE ON hotel.rezerwacja FOR EACH ROW EXECUTE PROCEDURE hotel.rezerwacja_valid();
 
--------------------------------------------------------------------------------- 
-
 
 CREATE OR REPLACE FUNCTION hotel.dodaj_zmien_pokoj() RETURNS TRIGGER AS
 $$
@@ -161,8 +154,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER pokoj_mod AFTER INSERT OR UPDATE OR DELETE ON hotel.pokoj FOR EACH ROW EXECUTE PROCEDURE hotel.dodaj_zmien_pokoj();
-
--------------------------------------------------------------------------------- 
+ 
 
 CREATE OR REPLACE FUNCTION hotel.termin_valid() RETURNS TRIGGER AS
 $$
@@ -177,9 +169,7 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
-CREATE TRIGGER walidacja_terminu BEFORE INSERT OR UPDATE ON hotel.termin FOR EACH ROW EXECUTE PROCEDURE hotel.termin_valid();
-
--------------------------------------------------------------------------------- 
+CREATE TRIGGER walidacja_terminu BEFORE INSERT OR UPDATE ON hotel.termin FOR EACH ROW EXECUTE PROCEDURE hotel.termin_valid(); 
 
 
 CREATE OR REPLACE FUNCTION hotel.osoba_dane_valid() RETURNS TRIGGER AS
@@ -199,8 +189,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER walidacja_danych BEFORE INSERT ON hotel.osoba FOR EACH ROW EXECUTE PROCEDURE hotel.osoba_dane_valid();
-
--------------------------------------------------------------------------------- 
+ 
 
 CREATE OR REPLACE FUNCTION hotel.edytuj_adres_osoby(VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR,VARCHAR) RETURNS text AS
 $$
@@ -218,8 +207,7 @@ BEGIN
 	END IF;
 END; 
 $$ LANGUAGE 'plpgsql';
-
--------------------------------------------------------------------------------- 
+ 
 
 
 CREATE OR REPLACE FUNCTION hotel.dodaj_pracownika(name VARCHAR, surname VARCHAR, login VARCHAR, password VARCHAR) RETURNS boolean AS
@@ -236,8 +224,7 @@ END
 $$
   LANGUAGE 'plpgsql';
 
-
--------------------------------------------------------------------------------- 
+ 
 
 CREATE OR REPLACE FUNCTION hotel.logowanie(log VARCHAR, pass VARCHAR) RETURNS table(id INTEGER, loggin varchar, password varchar) AS
 $$
@@ -246,8 +233,7 @@ BEGIN
 END
 $$
   LANGUAGE 'plpgsql';
-
--------------------------------------------------------------------------------- 
+ 
 
 create or replace function hotel.normalize_name() returns trigger language 'plpgsql' as $$ declare
 first_letter text; anoth text;
