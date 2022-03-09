@@ -1,5 +1,5 @@
 # Hotel-Management
-Hotel Management Application - project on "DB1" 
+Hotel Management Application - student project on "DB1" 
 
 
 It is a desktop application that requires access to internet. To run the application you must download "JDBC Drivers" from https://jdbc.postgresql.org 
